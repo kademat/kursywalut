@@ -1,4 +1,11 @@
 ﻿var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpClient("NBP", client =>
+{
+    client.BaseAddress = new Uri("http://api.nbp.pl/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
 builder.Services.AddControllers();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

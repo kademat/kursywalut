@@ -91,3 +91,6 @@ coverage/
 
 # VS
 .vs/
+
+# others
+bin/
