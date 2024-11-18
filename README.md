@@ -39,13 +39,13 @@ Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (fr
 - Frontend: `cd frontend & npm test`
 
 ## Plan rozwoju
-- [✅] Przygotowanie struktury projektu
-- [ ] Wyświetlanie kursów walut (bez pobierania ich z API)
+- [✅] Przygotowanie struktury projektu (v 0.1.0)
+- [ ] Wyświetlanie kursów walut (bez pobierania ich z API) (v 0.2.0)
 	- Statyczne dane w tabeli React
-- [ ] Pobieranie danych z API NBP
+- [ ] Pobieranie danych z API NBP (v 0.3.0)
 	- Użycie HttpClient do integracji z NBP API
-- [ ] Zapisywanie kursów do bazy
-- [ ] Wdrożenie projektu na produkcję
+- [ ] Zapisywanie kursów do bazy (v 0.4.0)
+- [ ] Wdrożenie projektu na produkcję (v 1.0.0)
 
 ## Linki
 - [Dokumentacja NBP API](http://api.nbp.pl/)
