@@ -5,25 +5,26 @@ Aplikacja webowa umożliwia pobieranie aktualnych kursów walut z [NBP API](http
 Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (frontend).
 
 ## Struktura projektu
-`/backend`
-  `Controllers/`		# Obsługa żądań HTTP
-  `Models/`				# Modele danych
-  `Repositories/`		# Logika dostępu do bazy danych
-  `Services/`			# Logika biznesowa
-  `Data/`				# Konfiguracja bazy danych, migracje
-  `Configurations/`		# Ustawienia aplikacji, integracje
-  `Tests/`				# Testy jednostkowe i integracyjne
 
-`/frontend`
-  `src/`
-    `components/`		# Reużywalne komponenty UI
-    `pages/`			# Główne strony aplikacji
-    `services/`			# Komunikacja z backendem
-    `styles/`			# Pliki CSS/SCSS
-    `utils/`			# Funkcje pomocnicze
-    `hooks/`			# Custom hooks React
-    `config/`			# Konfiguracja frontendu (np. API URL)
-    `__tests__/`		# Testy jednostkowe dla frontendu
+### `/backend`
+- `Controllers/`        # Obsługa żądań HTTP
+- `Models/`             # Modele danych
+- `Repositories/`       # Logika dostępu do bazy danych
+- `Services/`           # Logika biznesowa
+- `Data/`               # Konfiguracja bazy danych, migracje
+- `Configurations/`     # Ustawienia aplikacji, integracje
+- `Tests/`              # Testy jednostkowe i integracyjne
+
+### `/frontend`
+- `src/`
+  - `components/`       # Reużywalne komponenty UI
+  - `pages/`            # Główne strony aplikacji
+  - `services/`         # Komunikacja z backendem
+  - `styles/`           # Pliki CSS/SCSS
+  - `utils/`            # Funkcje pomocnicze
+  - `hooks/`            # Custom hooks React
+  - `config/`           # Konfiguracja frontendu (np. API URL)
+  - `__tests__/`        # Testy jednostkowe dla frontendu
   
 ## Wymagania systemowe
 - Node.js v16+ (dla frontendu)
