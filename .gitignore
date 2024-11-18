@@ -1,33 +1,93 @@
-
-#Ignore thumbnails created by Windows
+# Windows
 Thumbs.db
-#Ignore files built by Visual Studio
-*.obj
-*.exe
-*.pdb
+*.DS_Store
+
+# Visual Studio
 *.user
-*.aps
-*.pch
-*.vspscc
-*_i.c
-*_p.c
-*.ncb
 *.suo
-*.tlb
-*.tlh
-*.bak
-*.cache
-*.ilk
 *.log
-[Bb]in
+*.ilk
+*.obj
+*.pch
+*.pdb
+*.vspscc
+*.vssscc
+*.builds
+*.pidb
+*.svclog
+*.scc
+
+# Build results
+[Bb]in/
+[Oo]bj/
 [Dd]ebug*/
-*.lib
-*.sbr
-obj/
 [Rr]elease*/
-_ReSharper*/
-[Tt]est[Rr]esult*
-.vs/
+*.exe
+*.dll
+*.app
+*.log
+*.cache
+*.zip
+*.msi
+
+# Rider/JetBrains/IDEA
 .idea/
-#Nuget packages folder
+*.sln.iml
+_ReSharper*/
+*.DotSettings.user
+
+# Visual Studio Code
+.vscode/
+
+# Test results
+[Tt]est[Rr]esult*
+*.coverage
+*.coveragejson
+*.testlog
+
+# NuGet
 packages/
+*.nupkg
+*.snupkg
+.nuget/
+project.lock.json
+project.fragment.lock.json
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Entity Framework
+*.jfm
+
+# Azure Functions
+local.settings.json
+
+# React / Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+build/
+dist/
+.eslintcache
+.parcel-cache/
+.cache/
+*.env
+*.env.local
+*.env.development
+*.env.test
+*.env.production
+
+# Logs
+*.log
+logs/
+*.log.*
+*.out
+
+# Webpack/Babel
+.cache/
+coverage/
+
+# VS
+.vs/
