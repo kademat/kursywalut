@@ -40,7 +40,7 @@ Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (fr
 - Frontend: `cd frontend & npm test`
 
 ## Plan rozwoju
-- [✅] Przygotowanie struktury projektu (v 0.1.0)
+- [x] Przygotowanie struktury projektu (v 0.1.0)
 - [ ] Wyświetlanie kursów walut (bez pobierania ich z API) (v 0.2.0)
 	- Statyczne dane w tabeli React
 - [ ] Pobieranie danych z API NBP (v 0.3.0)
