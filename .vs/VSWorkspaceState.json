@@ -2,8 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\backend",
-    "\\frontend"
+    "\\backend\\Controllers",
+    "\\frontend",
+    "\\frontend\\src",
+    "\\frontend\\src\\services"
   ],
-  "SelectedNode": "\\backend\\Program.cs",
+  "SelectedNode": "\\backend\\launchSettings.json",
   "PreviewInSolutionExplorer": false
 }
