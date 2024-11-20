@@ -1,7 +1,7 @@
 
 namespace backend.Repositories
 {
-    public class InMemoryCurrencyRateRepository : ICurrencyRateRepository
+    public class InMemoryRepository : IRepository
     {
         private readonly List<NbpTable> _currencyRates = [];
 

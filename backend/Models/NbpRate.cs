@@ -4,9 +4,12 @@ namespace backend.Models
 {
     public class NbpRate
     {
-        public string currency { get; set; }
         [Key]
-        public string code { get; set; }
-        public decimal mid { get; set; }
+        [Required]
+        public string Code { get; set; }
+        [Required]
+        public string Currency { get; set; }
+        [Required]
+        public decimal Mid { get; set; }
     }
 }

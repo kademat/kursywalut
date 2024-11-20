@@ -2,70 +2,89 @@
 using backend.Repositories;
 using System.Text.Json;
 
-public class CurrencyService
+namespace backend.Services
 {
-    private readonly ICurrencyRateRepository _repository;
-    private readonly HttpClient _httpClient;
-
-    public CurrencyService(ICurrencyRateRepository repository, IHttpClientFactory httpClientFactory)
+    public class CurrencyService
     {
-        _repository = repository;
-        _httpClient = httpClientFactory.CreateClient("NBP");
-    }
+        private readonly IRepository _repository;
+        private readonly HttpClient _httpClient;
 
-    public async Task<List<NbpRate>> GetTodayRatesAsync()
-    {
-        var existingRates = await _repository.GetAllAsync();
-        var todayRates = existingRates
-            .Where(e => e.effectiveDate.Equals(DateOnly.FromDateTime(DateTime.Now)))
-            .SelectMany(e => e.rates)
-            .ToList();
-
-        return todayRates;
-    }
-
-    public async Task<List<NbpRate>?> GetRatesFromApiAsync()
-    {
-        var rates = await GetCurrencyRatesAsync();
-
-        if (rates == null || !rates.Any())
+        public CurrencyService(IRepository repository, IHttpClientFactory httpClientFactory)
         {
-            return null;
+            _repository = repository;
+            _httpClient = httpClientFactory.CreateClient("NBP");
         }
 
-        var rate = rates.First();
-        var nbpTable = new NbpTable
+        public async Task<List<NbpRate>> GetTodayRatesFromRepositoryAsync()
         {
-            table = rate.table,
-            no = rate.no,
-            effectiveDate = rate.effectiveDate,
-            rates = rate.rates.Select(r => new NbpRate
+            var existingRates = await _repository.GetAllAsync();
+            var today = DateOnly.FromDateTime(DateTime.Now).ToString();
+            var todayRates = existingRates
+                .Where(e => e.EffectiveDate == today)
+                .SelectMany(e => e.Rates)
+                .ToList();
+
+            return todayRates;
+        }
+
+        public async Task<List<NbpRate>?> GetRatesFromApiAsync()
+        {
+            var rates = await GetCurrencyRatesAsync();
+
+            if (rates == null || !rates.Any())
             {
-                currency = r.currency,
-                code = r.code,
-                mid = r.mid
-            }).ToList()
-        };
+                return null;
+            }
 
-        await _repository.AddAsync(nbpTable);
-        return nbpTable.rates;
-    }
+            var rate = rates.First();
+            var nbpTable = new NbpTable
+            {
+                Table = rate.Table,
+                No = rate.No,
+                EffectiveDate = rate.EffectiveDate,
+                Rates = rate.Rates.Select(r => new NbpRate
+                {
+                    Currency = r.Currency,
+                    Code = r.Code,
+                    Mid = r.Mid
+                }).ToList()
+            };
 
-    public async Task<List<NbpTable>> GetCurrencyRatesAsync()
-    {
-        var apiUrl = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json";
-        var response = await _httpClient.GetAsync(apiUrl);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new Exception("Błąd podczas pobierania danych z API NBP.");
+            await _repository.AddAsync(nbpTable);
+            return nbpTable.Rates;
         }
 
-        var content = await response.Content.ReadAsStringAsync();
-        JsonSerializerOptions options = new()
+        public async Task<List<NbpTable>> GetCurrencyRatesAsync()
         {
-            PropertyNameCaseInsensitive = true
-        };
-        return JsonSerializer.Deserialize<List<NbpTable>>(content);
+            var apiUrl = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json";
+            try
+            {
+                var response = await _httpClient.GetAsync(apiUrl);
+
+                // Sprawdzenie statusu odpowiedzi
+                response.EnsureSuccessStatusCode();
+
+                // Deserializacja danych
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                var contentStream = await response.Content.ReadAsStreamAsync();
+
+                return await JsonSerializer.DeserializeAsync<List<NbpTable>>(contentStream, options) ?? [];
+            }
+            catch (HttpRequestException ex)
+            {
+                // Logowanie błędu (przykład z konsolą - można użyć np. ILogger)
+                // Console.WriteLine($"Błąd żądania HTTP: {ex.Message}");
+                throw new Exception("Błąd podczas pobierania danych z API NBP.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Logowanie innych błędów
+                Console.WriteLine($"Nieoczekiwany błąd: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

@@ -1,21 +1,11 @@
 ﻿using backend.Configurations;
-using backend.Models;
 using backend.Repositories;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
+using backend.Services;
+using Polly;
 
+// Konfiguracja aplikacji
 var builder = WebApplication.CreateBuilder(args);
-
-// Rejestracja usług
-builder.Services.AddScoped<CurrencyService>();
-
-builder.Services.AddHttpClient("NBP", client =>
-{
-    HttpClientConfig.Configure(client);  // Wywołanie statycznej metody Configure
-});
-
-builder.Services.AddSingleton<ICurrencyRateRepository, InMemoryCurrencyRateRepository>();
-
+RegisterServices(builder.Services);
 builder.Services.AddControllers();
 
 // Swagger i OpenAPI
@@ -25,12 +15,7 @@ builder.Services.AddSwaggerGen();
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        policy.WithOrigins("https://localhost:3000", "https://tlmap.com")  // Adres aplikacji React
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
+    options.AddPolicy("AllowReactApp", CorsConfig.ConfigureAllowReactAppPolicy);
 });
 
 // Włączenie logowania
@@ -38,11 +23,12 @@ builder.Logging.AddConsole();  // Włączenie logowania do konsoli
 
 var app = builder.Build();
 
-// Konfiguracja CORS
+app.UseHttpsRedirection();
+app.UseStaticFiles();  // Serwowanie plików statycznych (w tym przypadku plików Reacta)
+app.UseRouting();
 app.UseCors("AllowReactApp");
 
 // Obsługa routingu i kontrolerów
-app.UseRouting();
 app.MapControllers();
 
 // Konfiguracja dla środowiska deweloperskiego (Swagger)
@@ -52,13 +38,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Umożliwienie obsługi plików statycznych (React)
-app.UseStaticFiles();  // Serwowanie plików statycznych (plików Reacta)
-
-app.UseRouting();
-
-// Obsługa SPA (React)
+// Obsługa React
 app.MapFallbackToFile("index.html");  // Przekierowuje na index.html aplikacji React, jeśli inne ścieżki nie pasują
 
-app.UseHttpsRedirection();
 app.Run();
+
+static void RegisterServices(IServiceCollection services)
+{
+    services.AddScoped<CurrencyService>();
+    services.AddSingleton<IRepository, InMemoryRepository>();
+    services.AddHttpClient("NBP", client =>
+    {
+        HttpClientConfig.Configure(client);
+    })
+        .AddTransientHttpErrorPolicy(policy =>
+            policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))); ;
+}
