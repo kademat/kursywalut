@@ -1,6 +1,8 @@
 # Aplikacja do pobierania kursów walut wraz z ich zapisem do bazy danych
 
 ## Opis projektu
+Aplikacja w wersji online jest dostępna na stronie https://tlmap.com
+
 Aplikacja webowa umożliwia pobieranie aktualnych kursów walut z [NBP API](http://api.nbp.pl/), zapisywanie ich w bazie danych oraz wyświetlanie na stronie internetowej.
 Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (frontend).
 
