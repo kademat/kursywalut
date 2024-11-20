@@ -1,42 +1,64 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using backend.Configurations;
+using backend.Models;
+using backend.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Rejestracja usług
+builder.Services.AddScoped<CurrencyService>();
 
 builder.Services.AddHttpClient("NBP", client =>
 {
-    client.BaseAddress = new Uri("http://api.nbp.pl/");
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    HttpClientConfig.Configure(client);  // Wywołanie statycznej metody Configure
 });
 
+builder.Services.AddSingleton<ICurrencyRateRepository, InMemoryCurrencyRateRepository>();
+
 builder.Services.AddControllers();
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger i OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("https://localhost:3000")  // Adres aplikacji React
+        policy.WithOrigins("https://localhost:3000", "https://tlmap.com")  // Adres aplikacji React
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
+// Włączenie logowania
 builder.Logging.AddConsole();  // Włączenie logowania do konsoli
 
 var app = builder.Build();
-app.UseCors("AllowReactApp");
-app.UseRouting();
 
+// Konfiguracja CORS
+app.UseCors("AllowReactApp");
+
+// Obsługa routingu i kontrolerów
+app.UseRouting();
 app.MapControllers();
 
-// Configure the HTTP request pipeline.
+// Konfiguracja dla środowiska deweloperskiego (Swagger)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Umożliwienie obsługi plików statycznych (React)
+app.UseStaticFiles();  // Serwowanie plików statycznych (plików Reacta)
 
+app.UseRouting();
+
+// Obsługa SPA (React)
+app.MapFallbackToFile("index.html");  // Przekierowuje na index.html aplikacji React, jeśli inne ścieżki nie pasują
+
+app.UseHttpsRedirection();
 app.Run();

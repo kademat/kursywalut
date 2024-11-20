@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Text.Json;
+﻿using backend.Models;
+using backend.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
@@ -8,68 +8,85 @@ namespace backend.Controllers
     [ApiController]
     public class CurrencyController : ControllerBase
     {
-        private readonly HttpClient _httpClient;
+        private readonly CurrencyService _currencyService;
 
-        public CurrencyController(IHttpClientFactory httpClientFactory)
+        public CurrencyController(CurrencyService currencyService)
         {
-            _httpClient = httpClientFactory.CreateClient("NBP");
+            _currencyService = currencyService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetCurrencyRates()
         {
-            // Endpoint API NBP
-            var apiUrl = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json";
-
             try
             {
-                // Wysyłanie zapytania GET do API NBP
-                var response = await _httpClient.GetAsync(apiUrl);
-
-                if (!response.IsSuccessStatusCode)
+                // Najpierw sprawdzamy, czy istnieją dzisiejsze kursy
+                var todayRates = await _currencyService.GetTodayRatesAsync();
+                if (todayRates.Any())
                 {
-                    return StatusCode((int)response.StatusCode, "Błąd podczas pobierania danych z API NBP.");
+                    return Ok(todayRates);
                 }
 
-                // Odczyt odpowiedzi jako JSON
-                var content = await response.Content.ReadAsStringAsync();
-                try
+                // Jeśli nie, pobieramy je z API
+                var ratesFromApi = await _currencyService.GetRatesFromApiAsync();
+                if (ratesFromApi == null || !ratesFromApi.Any())
                 {
-                    JsonSerializerOptions options = new()
-                    {
-                        PropertyNameCaseInsensitive = true
-                    };
-                    var rates = JsonSerializer.Deserialize<List<NbpTable>>(content);
-                    return Ok(rates?[0]?.rates);// Pobieramy listę walut z pierwszej tabeli
+                    return NotFound("No currency rates found.");
                 }
-                catch (JsonException ex)
-                {
-                    Console.WriteLine($"Błąd deserializacji: {ex.Message}");
-                }
-                return BadRequest();
-                // Zwrot przetworzonych danych
-                
+
+                return Ok(ratesFromApi);
+
+
+                //var existingRates = await _repository.GetAllAsync();
+
+                //// Filtruj tylko dane z dzisiejszym effectiveDate
+                //var todayRates = existingRates
+                //    .Where(e => e.effectiveDate.Equals(DateOnly.FromDateTime(DateTime.Now)))
+                //    .ToList();
+
+                //if (todayRates.Any())
+                //{
+                //    // Zwróć tylko dane z dzisiejszego dnia
+                //    return Ok(todayRates.Select(r => r.rates).ToList());
+                //}
+
+                //var rates = await _currencyService.GetCurrencyRatesAsync();
+
+                //if (rates == null || !rates.Any())
+                //{
+                //    return NotFound("No currency rates found.");
+                //}
+                //if(!existingRates.Any(er => er.effectiveDate == rates[0].effectiveDate))
+                //{
+                //    var nbpTable = new NbpTable
+                //    {
+                //        table = rates[0].table,
+                //        no = rates[0].no,
+                //        effectiveDate = rates[0].effectiveDate,
+                //        rates = [] // Inicjalizujemy listę NbpRate
+                //    };
+
+                //    foreach (var rate in rates[0].rates)
+                //    {
+                //        var nbpRate = new NbpRate
+                //        {
+                //            currency = rate.currency,
+                //            code = rate.code,
+                //            mid = rate.mid
+                //        };
+
+                //        // Dodajemy kurs waluty do listy w obiekcie NbpTable
+                //        nbpTable.rates.Add(nbpRate);
+                //    }
+                //    await _repository.AddAsync(nbpTable);
+                //}
+
+                //return Ok(rates?[0].rates); // Pobieramy listę walut z pierwszej tabeli
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Błąd podczas połączenia z API NBP: {ex.Message}");
+                return StatusCode(500, ex.Message);
             }
         }
-    }
-
-    // Klasy do mapowania odpowiedzi JSON z API NBP
-    public class NbpTable
-    {
-        public string table { get; set; }
-        public string no { get; set; }
-        public string effectiveDate { get; set; }
-        public List<NbpRate> rates { get; set; }
-    }
-
-    public class NbpRate
-    {
-        public string currency { get; set; }
-        public string code { get; set; }
-        public decimal mid { get; set; }
     }
 }

@@ -45,8 +45,8 @@ Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (fr
 	- Statyczne dane w tabeli React. Dodanie testów do frontendu.
 - [x] Pobieranie danych z API NBP (v 0.3.0)
 	- Użycie HttpClient do integracji z NBP API
-- [ ] Zapisywanie kursów do bazy (v 0.4.0)
-- [ ] Wdrożenie projektu na produkcję (v 1.0.0)
+- [x] Zapisywanie kursów do źródła danych reprezentującego bazę (v 0.4.0)
+- [ ] Wdrożenie projektu na produkcję (tlmap.com) (v 1.0.0)
 
 ## Linki
 - [Dokumentacja NBP API](http://api.nbp.pl/)

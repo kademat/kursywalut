@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import HomePage from '../pages/HomePage';
+import HomePage from '../pages/Home/HomePage';
 import useCurrencyData from '../hooks/useCurrencyData';
 
 // Mockowanie hooka useCurrencyData
