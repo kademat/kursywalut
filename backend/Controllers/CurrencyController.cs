@@ -7,9 +7,9 @@ namespace backend.Controllers
     [ApiController]
     public class CurrencyController : ControllerBase
     {
-        private readonly CurrencyService _currencyService;
+        private readonly ICurrencyService _currencyService;
 
-        public CurrencyController(CurrencyService currencyService)
+        public CurrencyController(ICurrencyService currencyService)
         {
             _currencyService = currencyService;
         }
@@ -19,21 +19,14 @@ namespace backend.Controllers
         {
             try
             {
-                // Najpierw sprawdzamy, czy istnieją dzisiejsze kursy w repozytorium
-                var todayRates = await _currencyService.GetTodayRatesFromRepositoryAsync();
-                if (todayRates.Any())
+                var rates = await _currencyService.GetCurrencyRatesAsync();
+
+                if (rates == null || rates.Count == 0)
                 {
-                    return Ok(todayRates);
+                    return NotFound("Nie odnaleziono kursów walut.");
                 }
 
-                // Jeśli nie, pobieramy je z API
-                var ratesFromApi = await _currencyService.GetRatesFromApiAsync();
-                if (ratesFromApi == null || !ratesFromApi.Any())
-                {
-                    return NotFound("Nie odnaleziono kursów w API.");
-                }
-
-                return Ok(ratesFromApi);
+                return Ok(rates);
             }
             catch (Exception ex)
             {

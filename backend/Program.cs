@@ -1,24 +1,26 @@
 ﻿using backend.Configurations;
 using backend.Repositories;
 using backend.Services;
+using Microsoft.Extensions.Options;
 using Polly;
 
 // Konfiguracja aplikacji
 var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder.Services);
+
+builder.Services.AddSingleton<AppSettingsConfig>();
+
 builder.Services.AddControllers();
 
 // Swagger i OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", CorsConfig.ConfigureAllowReactAppPolicy);
 });
 
-// Włączenie logowania
 builder.Logging.AddConsole();  // Włączenie logowania do konsoli
 
 var app = builder.Build();
@@ -45,12 +47,8 @@ app.Run();
 
 static void RegisterServices(IServiceCollection services)
 {
-    services.AddScoped<CurrencyService>();
     services.AddSingleton<IRepository, InMemoryRepository>();
-    services.AddHttpClient("NBP", client =>
-    {
-        HttpClientConfig.Configure(client);
-    })
-        .AddTransientHttpErrorPolicy(policy =>
-            policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))); ;
+    services.AddScoped<ICurrencyService, CurrencyService>();
+    services.AddHttpClient("NBP", HttpClientConfig.Configure).AddTransientHttpErrorPolicy(policy =>
+            policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))); // aby powtarzał zapytanie
 }
