@@ -1,5 +1,6 @@
 ﻿import React from "react";
 import "../styles/Header.css"
+import { NavLink } from 'react-router-dom';
 
 const Header = () => {
   return (
@@ -22,19 +23,14 @@ const Header = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav">
             <li className="nav-item">
-              <a className="nav-link" href="/details">
-                Szczegóły
-              </a>
-            </li>
-            <li className="nav-item">
-              {/*<a className="nav-link" href="/strona2">*/}
-              {/*  Strona 2*/}
-              {/*</a>*/}
-            </li>
-            <li className="nav-item">
-              {/*<a className="nav-link" href="/strona3">*/}
-              {/*  Strona 3*/}
-              {/*</a>*/}
+                  <NavLink 
+                    to="/details" 
+                    className="nav-link" 
+                    activeClassName="active-link"
+                  >
+                    Szczegóły
+                  </NavLink>
+
             </li>
           </ul>
         </div>

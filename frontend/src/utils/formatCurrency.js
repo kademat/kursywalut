@@ -1,0 +1,1 @@
+﻿// Ta klasa jest przykładem formatowania walut (na potrzeby projektu nie była potrzebna, pokazuje zamysł architektury i możliwości rozszerzenia)
