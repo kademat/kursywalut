@@ -47,6 +47,7 @@ namespace backend.Services
 
         private async Task<IList<NbpRate>> GetRatesFromApiAsync()
         {
+            // ten adres powinien zostać przeniesiony do pliku konfiguracyjnego
             var apiUrl = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json";
 
             try
