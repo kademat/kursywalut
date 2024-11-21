@@ -5,9 +5,9 @@ namespace backend.Repositories
     {
         private readonly List<NbpTable> _currencyRates = [];
 
-        public Task AddAsync(NbpTable rate)
+        public Task AddAsync(NbpTable table)
         {
-            _currencyRates.Add(rate);
+            _currencyRates.Add(table);
             return Task.CompletedTask;
         }
 

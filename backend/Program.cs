@@ -1,7 +1,6 @@
 ﻿using backend.Configurations;
 using backend.Repositories;
 using backend.Services;
-using Microsoft.Extensions.Options;
 using Polly;
 
 // Konfiguracja aplikacji
@@ -18,15 +17,20 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", CorsConfig.ConfigureAllowReactAppPolicy);
+    options.AddPolicy("AllowReactApp", builder =>
+    {
+        builder.WithOrigins("https://localhost:3000", "https://tlmap.com")
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
 });
 
 builder.Logging.AddConsole();  // Włączenie logowania do konsoli
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();  // Serwowanie plików statycznych (w tym przypadku plików Reacta)
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowReactApp");
 
@@ -42,6 +46,12 @@ if (app.Environment.IsDevelopment())
 
 // Obsługa React
 app.MapFallbackToFile("index.html");  // Przekierowuje na index.html aplikacji React, jeśli inne ścieżki nie pasują
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine("Request path: " + context.Request.Path); // Sprawdź, która ścieżka jest przetwarzana
+    await next();
+});
 
 app.Run();
 

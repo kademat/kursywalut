@@ -43,9 +43,15 @@ public class CurrencyServiceTests
         Assert.Collection(result,
             item =>
             {
-                Assert.Equal(expectedResult[0].Rates[0].Currency, item.Rates[0].Currency);
-                Assert.Equal(expectedResult[0].Rates[0].Code, item.Rates[0].Code);
-                Assert.Equal(expectedResult[0].Rates[0].Mid, item.Rates[0].Mid);
+                Assert.Equal(expectedResult[0].Rates[0].Currency, item.Currency);
+                Assert.Equal(expectedResult[0].Rates[0].Code, item.Code);
+                Assert.Equal(expectedResult[0].Rates[0].Mid, item.Mid);
+            },
+            item =>
+            {
+                Assert.Equal(expectedResult[0].Rates[1].Currency, item.Currency);
+                Assert.Equal(expectedResult[0].Rates[1].Code, item.Code);
+                Assert.Equal(expectedResult[0].Rates[1].Mid, item.Mid);
             });
         // DYSKUSJA: czy to naruszenie SRP? Scenariusz a powód zmiany
         repositoryMock.Verify(repo => repo.GetAllAsync(), Times.Once);
@@ -59,12 +65,13 @@ public class CurrencyServiceTests
     public async Task GetRates_EmptyRepository_ReturnsDataFromAPI()
     {
         // Arrange
-        var expectedContent = "[{ \"Table\": \"A\", \"No\": \"123\", \"EffectiveDate\": \"2024-11-20\", \"Rates\": [{ \"Currency\": \"USD\", \"Code\": \"USD\", \"Mid\": 4.2 }] }]";
         var _repositoryMock = new Mock<IRepository>();
         // repozytorium jest puste
         _repositoryMock.Setup(repo => repo.GetAllAsync()).ReturnsAsync([]);
 
         var handlerMock = new Mock<HttpMessageHandler>();
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var expectedContent = "[{ \"Table\": \"A\", \"No\": \"123\", \"EffectiveDate\": \"" + today + "\", \"Rates\": [{ \"Currency\": \"USD\", \"Code\": \"USD\", \"Mid\": 4.2 }] }]";
 
         handlerMock
             .Protected()  // używamy metody Protected aby zamokować użycie chronionych elementów HttpMessageHandler

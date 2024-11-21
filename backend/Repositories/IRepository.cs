@@ -4,7 +4,7 @@ namespace backend.Repositories
 {
     public interface IRepository
     {
-        Task AddAsync(NbpTable rate);
+        Task AddAsync(NbpTable table);
         Task<IEnumerable<NbpTable>> GetAllAsync();
         Task ClearAsync();
     }
