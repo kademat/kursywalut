@@ -1,10 +1,18 @@
 # Aplikacja do pobierania kursów walut wraz z ich zapisem do bazy danych
 
 ## Opis projektu
-Aplikacja w wersji online jest dostępna na stronie https://tlmap.com
 
-Aplikacja webowa umożliwia pobieranie aktualnych kursów walut z [NBP API](http://api.nbp.pl/), zapisywanie ich w bazie danych oraz wyświetlanie na stronie internetowej.
-Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (frontend).
+### Aplikacja w wersji online jest dostępna na mojej stronie [tlmap](https://tlmap.com), gdzie można zobaczyć ją w działaniu bez potrzeby lokalnej konfiguracji
+
+Aplikacja webowa umożliwia pobieranie aktualnych kursów walut z [NBP API](http://api.nbp.pl/), zapisywanie ich w repozytorium oraz wyświetlanie na stronie internetowej.
+Projekt został zrealizowany w technologii ASP.NET Core 8 (backend) oraz React (frontend).
+Aplikacja generuje również wykresy pokazujące zmiany kursów walut.
+
+### Strona główna:
+![image](https://github.com/user-attachments/assets/a76ee131-f345-48ae-b5e6-44b39df70f62)
+### Wykres pokazujący zmianę wartości waluty w czasie 90 dni:
+![image](https://github.com/user-attachments/assets/ad9c9c82-b2f0-4f23-912e-a2f09169b838)
+
 
 ## Struktura projektu
 
