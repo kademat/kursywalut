@@ -1,6 +1,8 @@
 # Aplikacja do pobierania kursów walut wraz z ich zapisem do bazy danych
 
 ## Opis projektu
+Aplikacja w wersji online jest dostępna na stronie https://tlmap.com
+
 Aplikacja webowa umożliwia pobieranie aktualnych kursów walut z [NBP API](http://api.nbp.pl/), zapisywanie ich w bazie danych oraz wyświetlanie na stronie internetowej.
 Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (frontend).
 
@@ -29,7 +31,6 @@ Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (fr
 ## Wymagania systemowe
 - Node.js v16+ (dla frontendu)
 - .NET 8 (dla backendu)
-- SQL Server/MySQL/PostgreSQL (dla bazy danych)
 
 ## Uruchomienie lokalne
 1. Backend: `cd backend && dotnet run`
@@ -54,11 +55,11 @@ Projekt został zrealizowany w technologii ASP.NET Core (backend) oraz React (fr
 ## Uwagi dla osoby sprawdzającej
 1. **Foldery i struktura projektu:**
    - Projekt podzielony jest na dwa główne foldery: `backend` i `frontend`.
-   - W folderze `backend` znajdują się pliki odpowiedzialne za API oraz integrację z bazą danych.
+   - W folderze `backend` znajdują się pliki odpowiedzialne za API oraz integrację z repozytorium.
    - W folderze `frontend` znajduje się aplikacja React, która komunikuje się z API.
 
 2. **Priorytety projektu:**
-   - Główny nacisk położony został na prostotę i czytelność kodu.
+   - Główny nacisk położony został na prostotę, czytelność oraz możliwość rozszerzania kodu.
    - Wszystkie teksty i komunikaty są w języku polskim - założeniem projektu jest współpraca z polskojęzycznymi programistami oraz polskojęzycznym klientem.
 
 3. **Testy:**
