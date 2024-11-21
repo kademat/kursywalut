@@ -1,4 +1,4 @@
-# Aplikacja do pobierania kursów walut wraz z ich zapisem do bazy danych
+# Aplikacja do pobierania kursów walut z API NBP wraz z ich zapisem do repozytorium
 
 ## Opis projektu
 
