@@ -60,19 +60,23 @@ Aplikacja generuje również wykresy pokazujące zmiany kursów walut.
 ## Zastosowane wzorce projektowe
 
 1. **Dependency Injection**
- - M.in. implementacja interfejsów IRepository i ICurrencyService oraz ich wstrzykiwanie do zależnych komponentów
-2. **Repository**
- - IRepository wraz z zachowaniem Single Responsibility
-3. **Factory**
- - IHttpClientFactory pozwala na tworzenie skonfigurowanych instancji HttpClient, zarządzając ich cyklem życia.
-4 **Strategy**
- - Polityka powtórzeń błędów zaimplementowana w HttpClient za pomocą biblioteki Polly.
-5. **Adapter**
+ - Implementacja interfejsów `IRepository` i `ICurrencyService` oraz ich wstrzykiwanie do zależnych komponentów
+2. **Repository Pattern**
+ - `EfRepository` i `InMemoryRepository` abstrahują dostęp do danych, izolując logikę aplikacji od szczegółów dotyczących bazy
+3. **Factory Pattern**
+ - `IHttpClientFactory` pozwala na tworzenie skonfigurowanych instancji `HttpClient`, zarządzając ich cyklem życia.
+4 **Strategy Pattern**
+ - `NbpHttpClientConfig` i konfiguracja klienta HTTP w `RegisterServices` implementują strategię konfiguracji klientów HTTP.
+5. **Adapter Pattern**
  - HttpClientConfig.Configure działa jako adapter do konfiguracji klienta HTTP.
-6. **Configuration**
- - Wzorzec Options jest zaimplementowany w klasie AppSettingsConfig
-7. **Facade**
-- CurrencyController działa jako warstwa upraszczająca dostęp do API, ukrywając złożoność wewnętrznej logiki.
+6. **Configuration Pattern**
+ - Wzorzec jest zaimplementowany w klasie `AppSettingsConfig`
+7. **Facade Pattern**
+- `CurrencyController` działa jako warstwa upraszczająca dostęp do API, ukrywając złożoność wewnętrznej logiki.
+8. **Builder Pattern**
+- Wykorzystanie `IServiceCollection` w `Program.cs` do rejestrowania usług i konfiguracji aplikacji.
+9. **Decorator Pattern**
+- Dodanie obsługi retry dla klienta HTTP przy użyciu `AddTransientHttpErrorPolicy`.
 
 ## Linki
 - [Dokumentacja NBP API](http://api.nbp.pl/)
