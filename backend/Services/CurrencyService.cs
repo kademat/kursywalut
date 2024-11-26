@@ -36,8 +36,6 @@ namespace backend.Services
         private async Task<IList<NbpRate>> GetRatesFromRepositoryAsync(DateOnly date, CurrencyTable currencyTable)
         {
             _logger.LogInformation($"Próba pobrania kursów walut z repozytorium dla tabeli {currencyTable}");
-            var existingRates = await _repository.GetAllAsync();
-            var today = DateOnly.FromDateTime(DateTime.Now);
 
             var table = currencyTable switch
             {
@@ -45,7 +43,10 @@ namespace backend.Services
                 CurrencyTable.MinorCurrencyTable => "B",
                 _ => throw new ArgumentException($"Tabela '{currencyTable}' nie jest obsługiwana")
             };
+            var today = DateOnly.FromDateTime(DateTime.Now);
 
+            // tu mogłaby zostać zastosowana optymalizacja np. GetRatesByDateAndTableAsync(date, table)
+            var existingRates = await _repository.GetAllAsync();
             var rates = existingRates
                 .Where(e => e.EffectiveDate == date && e.Table == table)
                 .SelectMany(e => e.Rates.Select(r => new NbpRate
@@ -81,6 +82,10 @@ namespace backend.Services
                 {
                     await _repository.AddAsync(mainCurrencyRates[0]);
                 }
+                else
+                {
+                    _logger.LogInformation("Dane z API odpowiadają już istniejącym w repozytorium, brak nowych danych.");
+                }
 
                 return mainCurrencyRates[0].Rates;
             }
@@ -111,7 +116,8 @@ namespace backend.Services
 
             if (nbpTableList == null || nbpTableList.Count == 0)
             {
-                return [];
+                _logger.LogWarning("API NBP zwróciło pustą listę danych.");
+                throw new Exception("Brak danych z API NBP.");
             }
 
             return nbpTableList;
