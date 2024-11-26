@@ -1,4 +1,5 @@
-﻿using backend.Services;
+﻿using backend.Mappers;
+using backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
@@ -15,18 +16,41 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCurrencyRates()
+        public async Task<IActionResult> GetMainCurrencyRates()
         {
             try
             {
-                var rates = await _currencyService.GetCurrencyRatesAsync();
+                var rates = await _currencyService.GetCurrencyRatesAsync(CurrencyTable.MainCurrencyTable);
 
                 if (rates == null || rates.Count == 0)
                 {
-                    return NotFound("Nie odnaleziono kursów walut.");
+                    return NotFound("Nie odnaleziono głównych kursów walut.");
+                }
+                // Tutaj można by użyć automappera
+                var ratesDto = rates.Select(r => r.ToDto()).ToList();
+                return Ok(ratesDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("minor")]
+        public async Task<IActionResult> GetMinorCurrencyRates()
+        {
+            try
+            {
+                var rates = await _currencyService.GetCurrencyRatesAsync(CurrencyTable.MinorCurrencyTable);
+
+                if (rates == null || rates.Count == 0)
+                {
+                    return NotFound("Nie odnaleziono głównych kursów walut.");
                 }
 
-                return Ok(rates);
+                // Tutaj można by użyć automappera
+                var ratesDto = rates.Select(r => r.ToDto()).ToList();
+                return Ok(ratesDto);
             }
             catch (Exception ex)
             {

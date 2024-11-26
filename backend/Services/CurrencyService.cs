@@ -1,7 +1,8 @@
-﻿using backend.Models;
+﻿using backend.Configurations;
+using backend.Models;
 using backend.Repositories;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace backend.Services
 {
@@ -9,32 +10,44 @@ namespace backend.Services
     {
         private readonly IRepository _repository;
         private readonly HttpClient _httpClient;
+        private readonly NbpApiSettings _apiSettings;
+        private readonly ILogger<CurrencyService> _logger;
 
-        public CurrencyService(IRepository repository, IHttpClientFactory httpClientFactory)
+        public CurrencyService(IRepository repository, IHttpClientFactory httpClientFactory, IOptions<NbpApiSettings> apiSettings, ILogger<CurrencyService> logger)
         {
             _repository = repository;
             _httpClient = httpClientFactory.CreateClient("NBP");
+            _apiSettings = apiSettings.Value;
+            _logger = logger;
         }
 
-        public async Task<IList<NbpRate>> GetCurrencyRatesAsync()
+        public async Task<IList<NbpRate>> GetCurrencyRatesAsync(CurrencyTable currencyTable = CurrencyTable.MainCurrencyTable)
         {
             var today = DateOnly.FromDateTime(DateTime.Now);
-            var dataFromRepository = await GetRatesFromRepositoryAsync(today);
+            var dataFromRepository = await GetRatesFromRepositoryAsync(today, currencyTable);
             if (dataFromRepository.Count != 0)
             {
                 return dataFromRepository;
             }
 
-            return await GetRatesFromApiAsync();
+            return await GetRatesFromApiAsync(currencyTable);
         }
 
-        private async Task<IList<NbpRate>> GetRatesFromRepositoryAsync(DateOnly date)
+        private async Task<IList<NbpRate>> GetRatesFromRepositoryAsync(DateOnly date, CurrencyTable currencyTable)
         {
+            _logger.LogInformation($"Próba pobrania kursów walut z repozytorium dla tabeli {currencyTable}");
             var existingRates = await _repository.GetAllAsync();
             var today = DateOnly.FromDateTime(DateTime.Now);
 
+            var table = currencyTable switch
+            {
+                CurrencyTable.MainCurrencyTable => "A",
+                CurrencyTable.MinorCurrencyTable => "B",
+                _ => throw new ArgumentException($"Tabela '{currencyTable}' nie jest obsługiwana")
+            };
+
             var rates = existingRates
-                .Where(e => e.EffectiveDate == date)
+                .Where(e => e.EffectiveDate == date && e.Table == table)
                 .SelectMany(e => e.Rates.Select(r => new NbpRate
                 {
                     Currency = r.Currency,
@@ -45,61 +58,66 @@ namespace backend.Services
             return rates;
         }
 
-        private async Task<IList<NbpRate>> GetRatesFromApiAsync()
+        private async Task<IList<NbpRate>> GetRatesFromApiAsync(CurrencyTable currencyTable = CurrencyTable.MainCurrencyTable)
         {
-            // ten adres powinien zostać przeniesiony do pliku konfiguracyjnego
-            var apiUrl = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json";
+            _logger.LogInformation($"Pobieranie kursów walut z API dla tabeli {currencyTable}");
 
             try
             {
-                var response = await _httpClient.GetAsync(apiUrl);
-
-                // Sprawdzenie statusu odpowiedzi
-                response.EnsureSuccessStatusCode();
-
-                // Deserializacja danych
-                var options = new JsonSerializerOptions
+                var apiAddress = currencyTable switch
                 {
-                    PropertyNameCaseInsensitive = true
+                    CurrencyTable.MainCurrencyTable => _apiSettings.AverageRatesMainCurrencies,
+                    CurrencyTable.MinorCurrencyTable => _apiSettings.AverageRatesMinorCurrencies,
+                    _ => throw new ArgumentException($"Tabela {currencyTable} nie jest obsługiwana przez API")
                 };
-                var contentStream = await response.Content.ReadAsStreamAsync();
-
-                var nbpTableList = await JsonSerializer.DeserializeAsync<List<NbpTable>>(contentStream, options) ?? [];
-
-                if (nbpTableList == null || nbpTableList.Count == 0)
-                {
-                    return [];
-                }
-
+                var mainCurrencyRates = await FetchRatesFromApiAsync(apiAddress);
                 var repository = await _repository.GetAllAsync();
 
                 // Sprawdzenie czy dane są już w repozytorium, aby nie dodawać ich ponownie.
                 // Może być tak, że jest już kolejny dzień, ale API jeszcze odpowiada danymi z poprzedniego dnia, które już są dodane.
                 // Zapytanie do API musi zostać wykonane, bo nie wiemy czy są już nowe dane. Jeśli będą nowe dane (z obecnego dnia) to
                 // dane zostaną zapisane do repozytorium i ponowne zapytanie do API nie zostanie wykonane
-                if (DataNotInRepository(nbpTableList, repository))
+                if (DataNotInRepository(mainCurrencyRates, repository))
                 {
-                    await _repository.AddAsync(nbpTableList[0]);
+                    await _repository.AddAsync(mainCurrencyRates[0]);
                 }
 
-                var rates = nbpTableList[0].Rates;
-
-                return rates;
+                return mainCurrencyRates[0].Rates;
             }
             catch (HttpRequestException ex)
             {
-                // Tu warto by było dodać logowanie do pliku lub bazy danych
+                _logger.LogError(ex, "Błąd podczas pobierania danych z API NBP");
                 throw new Exception("Błąd podczas pobierania danych z API NBP.", ex);
             }
             catch (Exception ex)
             {
-                // Tu warto by było dodać logowanie do pliku lub bazy danych - inny błąd
-                Console.WriteLine($"Nieoczekiwany błąd: {ex.Message}");
+                _logger.LogCritical(ex, "Nieoczekiwany błąd w GetRatesFromApiAsync");
                 throw;
             }
         }
 
-        private static bool DataNotInRepository(List<NbpTable> nbpTableList, IEnumerable<NbpTable> repository)
+        private async Task<IList<NbpTable>> FetchRatesFromApiAsync(string endpoint)
+        {
+            var response = await _httpClient.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            var contentStream = await response.Content.ReadAsStreamAsync();
+            var nbpTableList = await JsonSerializer.DeserializeAsync<List<NbpTable>>(contentStream, options) ?? [];
+
+            if (nbpTableList == null || nbpTableList.Count == 0)
+            {
+                return [];
+            }
+
+            return nbpTableList;
+        }
+
+        private static bool DataNotInRepository(IList<NbpTable> nbpTableList, IEnumerable<NbpTable> repository)
         {
             return !repository.Any(r => r.EffectiveDate == nbpTableList[0].EffectiveDate);
         }

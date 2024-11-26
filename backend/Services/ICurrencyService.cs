@@ -5,9 +5,10 @@ namespace backend.Services
     public interface ICurrencyService
     {
         /// <summary>
-        /// Pobiera wszystkie kursy walut dla danego dnia.
+        /// Pobiera aktualne kursy walut z tabeli NBP (zdefinowanej w CurrencyTable).
         /// </summary>
-        /// <returns>Lista tabel kursów walut.</returns>
-        Task<IList<NbpRate>> GetCurrencyRatesAsync();
+        /// <param name="currencyTable">Określa, czy mają być pobrane kursy z tabeli A (główne waluty, MainCurrencyTable) czy tabeli B (rzadsze waluty, MinorCurrencyTable).</param>
+        /// <returns>Lista kursów walut, reprezentowana przez obiekty typu <see cref="NbpRate"/>.</returns>
+        Task<IList<NbpRate>> GetCurrencyRatesAsync(CurrencyTable currencyTable);
     }
 }

@@ -7,7 +7,10 @@ const HomePage = () => {
 
     if (loading) return <p>Loading...</p>;
 
-    return (<CurrencyList data={data} showDetailsButton={false} />);
+    return (<>
+        <h1>Kursy głównych (popularnych) walut</h1>
+        <CurrencyList data={data} showDetailsButton={false} />
+    </>);
 };
 
 export default HomePage;

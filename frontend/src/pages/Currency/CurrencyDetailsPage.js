@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import CurrencyList from '../../components/CurrencyList';
 import useCurrencyList from '../../hooks/useCurrencyData';
 import { useNavigate } from 'react-router-dom';
@@ -13,11 +13,13 @@ const CurrencyDetailsPage = () => {
 
     if (loading) return <p>Loading...</p>;
 
-    return (<CurrencyList
+    return (<>
+        <h1>Wartości historyczne głównych walut (wykres zmian z 90 dni)</h1>
+        <CurrencyList
         data={data}
         showDetailsButton={true}
         onShowDetails={showSingleCurrencyDetails}
-    />);
+    /></>);
 };
 
 export default CurrencyDetailsPage;

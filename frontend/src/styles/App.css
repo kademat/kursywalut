@@ -20,6 +20,10 @@ th {
     padding: 1rem;
 }
 
+h1, h2 {
+    padding: 8px;
+}
+
 .currency-card {
     background: #f9f9f9;
     border: 1px solid #ddd;

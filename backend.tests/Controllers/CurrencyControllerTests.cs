@@ -5,43 +5,53 @@ using backend.Services;
 
 public class CurrencyControllerTests
 {
-    /// <summary>
-    /// Metoda nie odnalazła danych
-    /// </summary>
-    /// <returns>Zwracany jest kod błędu 404</returns>
-    [Fact]
-    public async Task GetCurrencyRates_ReturnsNotFoundWhenNoRates()
+    private Mock<ICurrencyService> _mockService;
+    private CurrencyController _controller;
+
+    public CurrencyControllerTests()
+    {
+        _mockService = new Mock<ICurrencyService>();
+        _controller = new CurrencyController(_mockService.Object);
+    }
+
+    [Theory]
+    [InlineData(CurrencyTable.MainCurrencyTable)]
+    [InlineData(CurrencyTable.MinorCurrencyTable)]
+    public async Task GetCurrencyRates_ReturnsNotFoundWhenNoRates(CurrencyTable currencyTable)
     {
         // Arrange
-        var mockService = new Mock<ICurrencyService>();
-        mockService.Setup(service => service.GetCurrencyRatesAsync())
-                   .ReturnsAsync([]); // Zwraca puste dane
-        var controller = new CurrencyController(mockService.Object);
+        _mockService.Setup(service => service.GetCurrencyRatesAsync(currencyTable))
+                    .ReturnsAsync([]); // Puste dane
 
         // Act
-        var result = await controller.GetCurrencyRates();
+        var result = currencyTable switch
+        {
+            CurrencyTable.MainCurrencyTable => await _controller.GetMainCurrencyRates(),
+            CurrencyTable.MinorCurrencyTable => await _controller.GetMinorCurrencyRates(),
+            _ => throw new ArgumentException($"Tabela nie jest wspierana: {currencyTable}")
+        };
 
         // Assert
         var statusCodeResult = Assert.IsType<NotFoundObjectResult>(result);
         Assert.Equal(404, statusCodeResult.StatusCode);
-
     }
 
-    /// <summary>
-    /// Następuje błąd serwera podczas próby pobrania danych
-    /// </summary>
-    /// <returns>Wyświetlany jest błąd serwera - 500</returns>
-    [Fact]
-    public async Task GetCurrencyRates_ReturnsInternalServerErrorWhenExceptionThrown()
+    [Theory]
+    [InlineData(CurrencyTable.MainCurrencyTable)]
+    [InlineData(CurrencyTable.MinorCurrencyTable)]
+    public async Task GetCurrencyRates_ReturnsInternalServerErrorWhenExceptionThrown(CurrencyTable currencyTable)
     {
         // Arrange
-        var mockService = new Mock<ICurrencyService>();
-        mockService.Setup(service => service.GetCurrencyRatesAsync())
-                   .ThrowsAsync(new Exception("Testowy błąd serwera"));
-        var controller = new CurrencyController(mockService.Object);
+        _mockService.Setup(service => service.GetCurrencyRatesAsync(currencyTable))
+                    .ThrowsAsync(new Exception("Testowy błąd serwera"));
 
         // Act
-        var result = await controller.GetCurrencyRates();
+        var result = currencyTable switch
+        {
+            CurrencyTable.MainCurrencyTable => await _controller.GetMainCurrencyRates(),
+            CurrencyTable.MinorCurrencyTable => await _controller.GetMinorCurrencyRates(),
+            _ => throw new ArgumentException($"Tabela nie jest wspierana: {currencyTable}")
+        };
 
         // Assert
         var statusCodeResult = Assert.IsType<ObjectResult>(result);

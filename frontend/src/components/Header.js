@@ -21,8 +21,18 @@ const Header = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav">
-            <li className="nav-item">
+                  <ul className="navbar-nav">
+                      <li className="nav-item">
+                          <NavLink
+                              to="/minor"
+                              className="nav-link"
+                              activeClassName="active-link"
+                          >
+                              Rzadkie waluty
+                          </NavLink>
+
+                      </li>
+                      <li className="nav-item">
                   <NavLink 
                     to="/details" 
                     className="nav-link" 
@@ -31,7 +41,8 @@ const Header = () => {
                     Szczegóły
                   </NavLink>
 
-            </li>
+                      </li>
+
           </ul>
         </div>
       </div>

@@ -1,64 +1,103 @@
 ﻿using backend.Configurations;
+using backend.Data;
 using backend.Repositories;
 using backend.Services;
+using Microsoft.EntityFrameworkCore;
 using Polly;
+using Serilog;
 
-// Konfiguracja aplikacji
-var builder = WebApplication.CreateBuilder(args);
-RegisterServices(builder.Services);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.File("logs/log-.txt",
+        rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext() // Dodaje kontekst logów, np. request ID
+    .CreateLogger();
 
-builder.Services.AddSingleton<AppSettingsConfig>();
-
-builder.Services.AddControllers();
-
-// Swagger i OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddCors(options =>
+try
 {
-    options.AddPolicy("AllowReactApp", builder =>
+    Log.Information("Uruchamianie aplikacji");
+    // Konfiguracja aplikacji
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Host.UseSerilog();
+    builder.Services.Configure<NbpApiSettings>(builder.Configuration.GetSection("NbpApiSettings"));
+    builder.Services.AddSingleton<NbpHttpClientConfig>();
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    RegisterServices(builder.Services);
+
+    builder.Services.AddControllers();
+
+    // Swagger i OpenAPI
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    builder.Services.AddCors(options =>
     {
-        builder.WithOrigins("https://localhost:3000", "https://tlmap.com")
-               .AllowAnyHeader()
-               .AllowAnyMethod();
+        options.AddPolicy("AllowReactApp", builder =>
+        {
+            builder.WithOrigins("https://localhost:3000", "https://tlmap.com")
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
     });
-});
 
-builder.Logging.AddConsole();  // Włączenie logowania do konsoli
+    builder.Logging.AddConsole();  // Włączenie logowania do konsoli
 
-var app = builder.Build();
+    var app = builder.Build();
 
-app.UseStaticFiles();  // Serwowanie plików statycznych (w tym przypadku plików Reacta)
-app.UseHttpsRedirection();
-app.UseRouting();
-app.UseCors("AllowReactApp");
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        dbContext.Database.Migrate(); // Przeprowadza migrację bazy danych
+    }
 
-// Obsługa routingu i kontrolerów
-app.MapControllers();
+    app.UseStaticFiles();  // Serwowanie plików statycznych (w tym przypadku plików Reacta)
+    app.UseHttpsRedirection();
+    app.UseRouting();
+    app.UseCors("AllowReactApp");
 
-// Konfiguracja dla środowiska deweloperskiego (Swagger)
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // Obsługa routingu i kontrolerów
+    app.MapControllers();
+
+    // Konfiguracja dla środowiska deweloperskiego (Swagger)
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    // Obsługa React
+    app.MapFallbackToFile("index.html");  // Przekierowuje na index.html aplikacji React, jeśli inne ścieżki nie pasują
+
+    app.Use(async (context, next) =>
+    {
+        Console.WriteLine("Request path: " + context.Request.Path); // Sprawdź, która ścieżka jest przetwarzana
+        await next();
+    });
+
+    app.Run();
+    Log.Information("Aplikacja uruchomiona pomyślnie");
 }
-
-// Obsługa React
-app.MapFallbackToFile("index.html");  // Przekierowuje na index.html aplikacji React, jeśli inne ścieżki nie pasują
-
-app.Use(async (context, next) =>
+catch (Exception ex)
 {
-    Console.WriteLine("Request path: " + context.Request.Path); // Sprawdź, która ścieżka jest przetwarzana
-    await next();
-});
-
-app.Run();
+    Log.Fatal(ex, "Aplikacja zakończyła działanie z powodu krytycznego błędu");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 static void RegisterServices(IServiceCollection services)
 {
-    services.AddSingleton<IRepository, InMemoryRepository>();
+
+    services.AddScoped<IRepository, EfRepository>();
+    // services.AddSingleton<IRepository, InMemoryRepository>(); // opcjonalna podmiana na InMemoryRepository
     services.AddScoped<ICurrencyService, CurrencyService>();
-    services.AddHttpClient("NBP", HttpClientConfig.Configure).AddTransientHttpErrorPolicy(policy =>
-            policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))); // aby powtarzał zapytanie
+    services.AddHttpClient("NBP", (sp, client) =>
+    {
+        var httpClientConfig = sp.GetRequiredService<NbpHttpClientConfig>();
+        httpClientConfig.Configure(client);
+
+    }).AddTransientHttpErrorPolicy(policy =>
+        policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
 }
