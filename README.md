@@ -1,4 +1,4 @@
-# Aplikacja do pobierania kursów walut z API NBP wraz z ich zapisem do repozytorium
+# Aplikacja do pobierania kursów walut z API NBP wraz z ich zapisem do bazy danych
 
 ## Opis projektu
 
@@ -8,23 +8,32 @@ Aplikacja webowa umożliwia pobieranie aktualnych kursów walut z [NBP API](http
 Projekt został zrealizowany w technologii ASP.NET Core 8 (backend) oraz React (frontend).
 Aplikacja generuje również wykresy pokazujące zmiany kursów walut.
 
-### Strona główna:
-![image](https://github.com/user-attachments/assets/a76ee131-f345-48ae-b5e6-44b39df70f62)
-### Wykres pokazujący zmianę wartości waluty w czasie 90 dni:
-![image](https://github.com/user-attachments/assets/ad9c9c82-b2f0-4f23-912e-a2f09169b838)
+### Strona główna - https://tlmap.com:
+
+![image](https://github.com/user-attachments/assets/d46d5f3a-d121-4588-8f6a-a0de3b3e5a80)
+### Kursy rzadkich walut - https://tlmap.com/minor:
+![image](https://github.com/user-attachments/assets/c714df59-89d7-47e3-8651-1a20b31b0918)
+### Wykres pokazujący zmianę wartości waluty w czasie 90 dni - https://tlmap.com/details/USD:
+![image](https://github.com/user-attachments/assets/e4811357-7c3c-4fea-89e0-8d6a474a93fa)
+
 
 
 ## Struktura projektu
 
 ### `/backend`
+- `Configurations/`     # Ustawienia aplikacji, integracje
 - `Controllers/`        # Obsługa żądań HTTP
+- `Data/`               # Konfiguracja kontekstu bazy danych + baza danych
+- `Dtos/`               # Data Transfer Objects
+- `logs/`		# logi zapisywane w pliku
+- `Mappers/`		# Mapowanie modeli biznesowych na dto i dto na modele biznesowe
 - `Models/`             # Modele danych
 - `Repositories/`       # Logika dostępu do bazy danych
 - `Services/`           # Logika biznesowa
-- `Data/`               # Konfiguracja bazy danych, migracje
-- `Configurations/`     # Ustawienia aplikacji, integracje
-- `Tests/`              # Testy jednostkowe i integracyjne
-
+### `/backend.tests`
+- `Controllers/`	# Testy kontrollerów
+- `Services/`		# Testy serwisów
+  
 ### `/frontend`
 - `src/`
   - `components/`       # Reużywalne komponenty UI
@@ -83,16 +92,17 @@ Aplikacja generuje również wykresy pokazujące zmiany kursów walut.
 
 ## Uwagi dla osoby sprawdzającej
 1. **Foldery i struktura projektu:**
-   - Projekt podzielony jest na dwa główne foldery: `backend` i `frontend`.
-   - W folderze `backend` znajdują się pliki odpowiedzialne za API oraz integrację z repozytorium.
+   - Projekt podzielony jest na trzy główne foldery: `backend`, `frontend` oraz `backend.tests`.
+   - W folderze `backend` znajdują się pliki odpowiedzialne za API oraz integrację z bazą danych.
    - W folderze `frontend` znajduje się aplikacja React, która komunikuje się z API.
+   - W folderze `backend.tests` znajdują się testy jednostkowe
 
 2. **Priorytety projektu:**
-   - Główny nacisk położony został na prostotę, czytelność oraz możliwość rozszerzania kodu.
-   - Wszystkie teksty i komunikaty są w języku polskim - założeniem projektu jest współpraca z polskojęzycznymi programistami oraz polskojęzycznym klientem.
+   - Główny nacisk położony został na prostotę, czytelność oraz możliwość rozszerzania kodu z zastosowaniem wzorców projektowych.
+   - Teksty i komunikaty są w języku polskim - założeniem projektu jest współpraca z polskojęzycznymi programistami oraz polskojęzycznym klientem.
 
 3. **Testy:**
-   - W projekcie dodano podstawową strukturę dla testów zarówno dla backendu (xUnit), jak i frontendu (Jest/React Testing Library).
+   - W projekcie dodano podstawową strukturę dla testów zarówno dla backendu (xUnit), jak i frontendu (Jest).
    - Przykładowe testy zostały umieszczone w odpowiednich katalogach, aby pokazać podejście do testowania.
 
 4. **Hosting:**
