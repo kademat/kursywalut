@@ -57,6 +57,23 @@ Aplikacja generuje również wykresy pokazujące zmiany kursów walut.
 - [x] Zapisywanie kursów do źródła danych reprezentującego bazę (v 0.4.0)
 - [x] Wdrożenie projektu na produkcję (tlmap.com) (v 1.0.0)
 
+## Zastosowane wzorce projektowe
+
+1. **Dependency Injection**
+ - M.in. implementacja interfejsów IRepository i ICurrencyService oraz ich wstrzykiwanie do zależnych komponentów
+2. **Repository**
+ - IRepository wraz z zachowaniem Single Responsibility
+3. **Factory**
+ - IHttpClientFactory pozwala na tworzenie skonfigurowanych instancji HttpClient, zarządzając ich cyklem życia.
+4 **Strategy**
+ - Polityka powtórzeń błędów zaimplementowana w HttpClient za pomocą biblioteki Polly.
+5. **Adapter**
+ - HttpClientConfig.Configure działa jako adapter do konfiguracji klienta HTTP.
+6. **Configuration**
+ - Wzorzec Options jest zaimplementowany w klasie AppSettingsConfig
+7. **Facade**
+- CurrencyController działa jako warstwa upraszczająca dostęp do API, ukrywając złożoność wewnętrznej logiki.
+
 ## Linki
 - [Dokumentacja NBP API](http://api.nbp.pl/)
 
