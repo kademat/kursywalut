@@ -51,7 +51,7 @@ Aplikacja generuje również wykresy pokazujące zmiany kursów walut.
 
 ## Uruchomienie lokalne
 1. Backend: `cd backend && dotnet run`
-2. Frontend: `cd frontend && npm install && npm start`
+2. Frontend: `cd frontend && npm install && set HTTPS=true && npm start`
 
 ## Testy
 - Backend: `cd backend && dotnet test`
