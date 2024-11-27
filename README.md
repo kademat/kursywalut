@@ -51,11 +51,11 @@ Aplikacja generuje również wykresy pokazujące zmiany kursów walut.
 
 ## Uruchomienie lokalne
 1. Backend: `cd backend && dotnet run`
-2. Frontend: `cd frontend && npm start`
+2. Frontend: `cd frontend && npm install && npm start`
 
 ## Testy
 - Backend: `cd backend && dotnet test`
-- Frontend: `cd frontend & npm test`
+- Frontend: `cd frontend && npm test`
 
 ## Plan rozwoju
 - [x] Przygotowanie struktury projektu (v 0.1.0)
